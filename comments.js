@@ -1,30 +1,18 @@
-// create a web server that listens for incoming requests
-// and responds with a list of comments from the database
+// create a web server
+var http = require('http');
+var fs = require('fs');
+var url = require('url');
 
-// import the express library
-const express = require('express');
-// import the sqlite3 library
-const sqlite3 = require('sqlite3');
-
-// create a new express application
-const app = express();
-// create a new database connection
-const db = new sqlite3.Database('example.sqlite');
-
-// create a new table in the database
-db.run('CREATE TABLE IF NOT EXISTS comments (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, message TEXT)');
-
-// create a new route that listens for GET requests
-app.get('/comments', (req, res) => {
-  // select all comments from the database
-  db.all('SELECT * FROM comments', (err, rows) => {
-    // send the list of comments as a JSON response
-    res.json(rows);
-  });
-});
-
-// start the web server on port 3000
-app.listen(3000, () => {
-  console.log('Server started on http://localhost:3000');
-});
-
+http.createServer(function (req, res) {
+    var q = url.parse(req.url, true);
+    var filename = "." + q.pathname;
+    fs.readFile(filename, function(err, data) {
+        if (err) {
+            res.writeHead(404, {'Content-Type': 'text/html'});
+            return res.end("404 Not Found");
+        }
+        res.writeHead(200, {'Content-Type': 'text/html'});
+        res.write(data);
+        return res.end();
+    });
+}).listen(8080);
